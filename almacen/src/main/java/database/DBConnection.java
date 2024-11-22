@@ -8,10 +8,10 @@ public class DBConnection {
     private static Connection connection;
 
     public Connection getConnection(){
-        if(connection==null){
+        if(connection==null){// Si la conexión no existe la crea
             createConnection();
         }
-        return connection;
+        return connection;//Si existe la retorna
     }
 
     private void createConnection(){
