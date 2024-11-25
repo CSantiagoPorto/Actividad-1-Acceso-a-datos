@@ -1,7 +1,6 @@
 import database.DBConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,13 +33,14 @@ public class Entrada {
             mostrarProductos();
             mostrarPedidos();
             mostrar600(products, dbConnection);
+            mostrar1000(products,dbConnection);
             insertarFav(products,dbConnection);
             agregarPedido(1, "Perfume", 300);
             agregarPedido(2, "Skincare", 80);
             agregarPedido(3,"Varios",123);
-            // agregarEmpleado("María", "Noya Sánchez", "Nosanma@almacen.com");
-           // agregarEmpleado("Luis", "Sánchez Pérez", "Sanpelu@almacen.com");
-            // agregarEmpleado("Mercedes", "Santiago Sánchez", "sansanmer@almacen.com");
+            agregarEmpleado("María", "Noya Sánchez", "Nosanma@almacen.com");
+            agregarEmpleado("Luis", "Sánchez Pérez", "Sanpelu@almacen.com");
+            agregarEmpleado("Mercedes", "Santiago Sánchez", "sansanmer@almacen.com");
             agregarEmpleado("María", "Mato ÁLvarez", "Maalma@almacen.com");
 
 
@@ -222,7 +222,7 @@ public class Entrada {
 
         }
     }
-    public static void mostrar100(JSONArray productos,Connection connection){
+    public static void mostrar1000(JSONArray productos,Connection connection){
         String query ="SELECT * FROM productos";
         try {
             PreparedStatement preparedStatement= connection.prepareStatement(query);
