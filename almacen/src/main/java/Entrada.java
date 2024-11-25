@@ -26,7 +26,7 @@ public class Entrada {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
             //Buffered porque es muy grande. Abrimos el glijo de datos
             String responseLine = bufferedReader.readLine();//Creamos un  String
-            JSONObject response = new JSONObject(responseLine);// Creamos un JSONObject
+            JSONObject response = new JSONObject(responseLine);// Creamos un JSONObject y le pasamos el String
             JSONArray products = response.getJSONArray("products");//Y un array de JSON con la Key del nombre del Array del DummyJson
 
             insertarProductos(products, dbConnection);
@@ -37,8 +37,11 @@ public class Entrada {
             insertarFav(products,dbConnection);
             agregarPedido(1, "Perfume", 300);
             agregarPedido(2, "Skincare", 80);
-
-           // agregarEmpleado("María", "Noya Sánchez", "Nosanma@almacen.com");
+            agregarPedido(3,"Varios",123);
+            // agregarEmpleado("María", "Noya Sánchez", "Nosanma@almacen.com");
+           // agregarEmpleado("Luis", "Sánchez Pérez", "Sanpelu@almacen.com");
+            // agregarEmpleado("Mercedes", "Santiago Sánchez", "sansanmer@almacen.com");
+            agregarEmpleado("María", "Mato ÁLvarez", "Maalma@almacen.com");
 
 
         } catch (IOException e) {
@@ -73,13 +76,13 @@ public class Entrada {
 
             System.out.println("Lista de empleados:");
             while (resultSet.next()) {
-                // Obtener datos de cada empleado
+                // Obtengo los datos de cada empleado
                 int id = resultSet.getInt("id");
                 String nombre = resultSet.getString("nombre");
                 String apellidos = resultSet.getString("apellidos");
                 String correo = resultSet.getString("correo");
 
-                // Mostrar en consola
+
                 System.out.printf("ID: %d, Nombre: %s %s, Correo: %s%n", id, nombre, apellidos, correo);
             }
         } catch (SQLException e) {
@@ -217,6 +220,24 @@ public class Entrada {
         } catch (SQLException e) {
             throw new RuntimeException(e);
 
+        }
+    }
+    public static void mostrar100(JSONArray productos,Connection connection){
+        String query ="SELECT * FROM productos";
+        try {
+            PreparedStatement preparedStatement= connection.prepareStatement(query);
+            System.out.println("Lista de artículos con precio superior a 1000 euros");
+            for(int i =0; i<productos.length(); i++){
+                JSONObject producto= productos.getJSONObject(i);
+                double precio =producto.getDouble("price");
+                if(precio>1000){
+                    String nombre= producto.getString("title");
+                    String description =producto.getString("description");
+                    System.out.printf("Nombre: %s\nDescripción: %s\nPrecio: %.2f€", nombre, description, precio);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }
