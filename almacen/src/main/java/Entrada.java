@@ -160,7 +160,7 @@ public class Entrada {
                 String descripcion = producto.getString("description");
                 int cantidad = producto.getInt("stock");
                 double precio = producto.getDouble("price");
-                preparedStatement.setString(1, nombre);//Con esto vamos a hacer la adicción
+                preparedStatement.setString(1, nombre);//Con esto vamos a hacer la adición
                 preparedStatement.setString(2, descripcion);
                 preparedStatement.setInt(3, cantidad);
                 preparedStatement.setDouble(4, precio);
@@ -194,12 +194,12 @@ public class Entrada {
                     ResultSet resultSet = verificarStmt.executeQuery();
 
                     if (resultSet.next()) {
-                        int idProductoBD = resultSet.getInt("id"); // Obtener el ID 
-                        insertarStmt.setInt(1, idProductoBD);
+                        int idProducto = resultSet.getInt("id"); // Obtener el ID
+                        insertarStmt.setInt(1, idProducto);
                         insertarStmt.execute();
-                        System.out.println("Producto agregado a favoritos con ID: " + idProductoBD);
+                        System.out.println("Producto agregado a favoritos con ID: " + idProducto);
                     } else {
-                        System.out.println("El producto \"" + nombreProducto + "\" no existe en la tabla 'productos'.");
+                        System.out.println("El producto \"" + nombreProducto + "\" no existe en la tabla productos.");
                     }
                 }
             }
