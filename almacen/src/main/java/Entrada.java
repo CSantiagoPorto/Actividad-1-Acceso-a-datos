@@ -29,19 +29,19 @@ public class Entrada {
             JSONArray products = response.getJSONArray("products");//Y un array de JSON con la Key del nombre del Array del DummyJson
 
             insertarProductos(products, dbConnection);
-            mostrarEmpleados();
             mostrarProductos();
-            mostrarPedidos();
-            mostrar600(products, dbConnection);
-            mostrar1000(products,dbConnection);
-            insertarFav(products,dbConnection);
-            agregarPedido(1, "Perfume", 300);
-            agregarPedido(2, "Skincare", 80);
-            agregarPedido(3,"Varios",123);
+            agregarPedido(391, "Essence Mascara Lash Princess", 9.99);
+            agregarPedido(392, "Eyeshadow Palette with Mirror", 19.99);
+            agregarPedido(393,"Powder Canister",14.99);
             agregarEmpleado("María", "Noya Sánchez", "Nosanma@almacen.com");
             agregarEmpleado("Luis", "Sánchez Pérez", "Sanpelu@almacen.com");
             agregarEmpleado("Mercedes", "Santiago Sánchez", "sansanmer@almacen.com");
             agregarEmpleado("María", "Mato ÁLvarez", "Maalma@almacen.com");
+            mostrarEmpleados();
+            mostrarPedidos();
+            mostrar600(products, dbConnection);
+           // mostrar1000(products,dbConnection);
+            insertarFav(products,dbConnection);
 
 
         } catch (IOException e) {
@@ -50,15 +50,26 @@ public class Entrada {
     }
 
     public static void agregarPedido(int id_producto, String descripcion, double precio_total) {
+        String verificarProducto = "SELECT COUNT(*) FROM productos WHERE id = ?";
         String query = "INSERT INTO pedidos (id_producto, descripcion, precio_total) VALUES (?, ?, ?)";
         Connection connection = new DBConnection().getConnection();
 
         try {
+            // Comprobamos si el producto existe
+            PreparedStatement existe = connection.prepareStatement(verificarProducto);
+            existe.setInt(1, id_producto);
+            ResultSet resultSet = existe.executeQuery();
+            resultSet.next();
+            if (resultSet.getInt(1) == 0) {
+                System.out.println("El producto con ID " + id_producto + " no existe. No se puede agregar el pedido.");
+                return;
+            }
+
+            // Ahora sí podemos añadirlo
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, id_producto);
             preparedStatement.setString(2, descripcion);
             preparedStatement.setDouble(3, precio_total);
-
             preparedStatement.execute();
             System.out.println("Pedido agregado con éxito para el producto con ID: " + id_producto);
         } catch (SQLException e) {
@@ -107,7 +118,7 @@ public class Entrada {
                 double precio= resultSet.getDouble("precio");
 
 
-                System.out.printf("id: %d, Nombre: %s %s, Correo: %s%n", id, nombre, descripcion, cantidad, precio);
+                System.out.printf("id: %d, Nombre: %s %s, Cantidad: %s%n, Precio:%s%n", id, nombre, descripcion, cantidad, precio);
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener los productos: " + e.getMessage());
@@ -128,7 +139,7 @@ public class Entrada {
                 int id_producto= resultSet.getInt("id_producto");
                 String descripcion = resultSet.getString("descripcion");
                 double precio_total= resultSet.getDouble("precio_total");
-                System.out.printf("ID: %d, Nombre: %s %s, Correo: %s%n", id, id_producto, descripcion, precio_total);
+                System.out.printf("ID: %d, ID Producto: %d, Descripción: %s, Precio Total: %.2f%n", id, id_producto, descripcion, precio_total);
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener empleados: " + e.getMessage());
@@ -161,26 +172,44 @@ public class Entrada {
             System.out.println("Error al insertar productos: " + e.getMessage());
         }
     }
-    public static void insertarFav(JSONArray productos, Connection connection){
-        String query = "INSERT INTO productos_fav (id_producto) VALUES (?)";
+    public static void insertarFav(JSONArray productos, Connection connection) {
+        // Con esta consulta nos aseguramos de que existe
+        String verificarProducto = "SELECT id FROM productos WHERE nombre = ?";
+        // Con esta consulta insertamos en la tabla id_producto
+        String insertarFavorito = "INSERT INTO productos_fav (id_producto) VALUES (?)";
+
         try {
-            PreparedStatement preparedStatement= connection.prepareStatement(query);
-            for(int i = 0; i < productos.length(); i++){
+            //Asociamos la query SELECT id FROM productos WHERE nombre = ? con la base de datos
+            PreparedStatement verificarStmt = connection.prepareStatement(verificarProducto);
+            //Lo mismo pero con la consulta de inserción
+            PreparedStatement insertarStmt = connection.prepareStatement(insertarFavorito);
+
+            for (int i = 0; i < productos.length(); i++) {
                 JSONObject producto = productos.getJSONObject(i);
+                String nombreProducto = producto.getString("title");
                 double precio = producto.getDouble("price");
-                int idProducto= producto.getInt("id");
-                if(precio>1000){
-                    preparedStatement.setInt(1, idProducto);
-                    preparedStatement.execute();
-                    System.out.println("Producto agregado con éxito"+idProducto);
+                if (precio > 1000) {
+                    // Verificar si el producto existe en la tabla productos
+                    verificarStmt.setString(1, nombreProducto);
+                    ResultSet resultSet = verificarStmt.executeQuery();
 
+                    if (resultSet.next()) {
+                        int idProductoBD = resultSet.getInt("id"); // Obtener el ID 
+                        insertarStmt.setInt(1, idProductoBD);
+                        insertarStmt.execute();
+                        System.out.println("Producto agregado a favoritos con ID: " + idProductoBD);
+                    } else {
+                        System.out.println("El producto \"" + nombreProducto + "\" no existe en la tabla 'productos'.");
+                    }
                 }
-
             }
         } catch (SQLException e) {
-            System.out.println("Error al insertar productos: " + e.getMessage());
+            System.out.println("Error al insertar productos favoritos: " + e.getMessage());
         }
     }
+
+
+
 
 
     public static void agregarEmpleado(String nombre, String apellidos, String correo) {
